@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "allowSyntheticDefaultImports": true,
+        "noFallthroughCasesInSwitch": true,
+        "noUnusedParameters": false,
+        "noImplicitReturns": true,
+        "esModuleInterop": true,
+        "noUnusedLocals": false,
+        "noImplicitAny": false,
+        "declarationDir": "dist/types",
+        "declaration": true,
+        "target": "esnext",
+        "module": "esnext",
+        "strict": false,
+        "jsx": "react",
+        "experimentalDecorators": true,
+        "moduleResolution": "node",
+        "baseUrl": ".",
+        "paths": {
+            "@*": ["src/*"]
+        }
+    },
+    "include": ["src/**/*"],
+    "exclude": ["node_modules", "dist"]
+}

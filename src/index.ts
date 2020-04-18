@@ -11,7 +11,7 @@ const gameLoop = (timestamp: number) => {
     }
     requestAnimationFrame(gameLoop);
 
-    const dt = (timestamp - lastFrameUpdateTime) * 0.06;
+    const dt = (timestamp - lastFrameUpdateTime) * 0.01;
 
     render();
 

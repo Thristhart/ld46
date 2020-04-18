@@ -10,8 +10,8 @@ export const Kinematic = buildBehavior(
     },
 
     (entity, dt) => {
-        const newVelocityX = entity.acceleration.x * dt;
-        const newVelocityY = entity.acceleration.y * dt;
+        const newVelocityX = entity.velocity.x + entity.acceleration.x * dt;
+        const newVelocityY = entity.velocity.y + entity.acceleration.y * dt;
 
         entity.position.x += ((entity.velocity.x + newVelocityX) / 2) * dt;
         entity.position.y += ((entity.velocity.y + newVelocityY) / 2) * dt;

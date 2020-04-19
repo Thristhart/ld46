@@ -1,20 +1,24 @@
 import "./index.css";
 import { render } from "./render";
 import { entities } from "@global";
-import { Player } from "@entities/player";
-import { Kinematic } from "@behaviors/kinematic";
+import { FIXED_TIMESTEP } from "@constants";
 
 let lastFrameUpdateTime: number;
-const gameLoop = (timestamp: number) => {
+
+const gameLoop = () => {
+    const timestamp = performance.now();
+
     if (lastFrameUpdateTime === undefined) {
         lastFrameUpdateTime = timestamp;
     }
-    requestAnimationFrame(gameLoop);
+    const actualDelta = timestamp - lastFrameUpdateTime;
+    const dt = FIXED_TIMESTEP * 0.01;
 
-    const dt = (timestamp - lastFrameUpdateTime) * 0.01;
-
-    render();
-
+    entities.forEach((ent) => {
+        ent.behaviors.forEach((behavior) => {
+            behavior.beforeUpdate(ent);
+        });
+    });
     entities.forEach((ent) => {
         ent.update(dt);
     });
@@ -22,8 +26,18 @@ const gameLoop = (timestamp: number) => {
     lastFrameUpdateTime = timestamp;
 };
 
-const player = Player(50, 20);
-player.acceleration.y = 9.8;
-entities.push(player);
+let lastDrawUpdateTime: number;
+const drawLoop = (timestamp: number) => {
+    if (lastDrawUpdateTime === undefined) {
+        lastDrawUpdateTime = timestamp;
+    }
+    requestAnimationFrame(drawLoop);
 
-requestAnimationFrame(gameLoop);
+    const dt = timestamp - lastDrawUpdateTime;
+    render(dt);
+
+    lastDrawUpdateTime = timestamp;
+};
+
+requestAnimationFrame(drawLoop);
+setInterval(gameLoop, FIXED_TIMESTEP);

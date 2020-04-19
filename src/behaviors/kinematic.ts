@@ -1,15 +1,13 @@
 import Vector from "victor";
-import { Entity } from "@entities/entity";
-import { Behavior, buildBehavior } from "./behavior";
-import { FRICTION_COEFFICIENT } from "@constants";
+import { buildBehavior } from "./behavior";
 
-export const Kinematic = buildBehavior(
-    {
+export const Kinematic = buildBehavior({
+    properties: () => ({
         acceleration: new Vector(0, 0),
         velocity: new Vector(0, 0),
-    },
+    }),
 
-    (entity, dt) => {
+    update(entity, dt) {
         const newVelocityX = entity.velocity.x + entity.acceleration.x * dt;
         const newVelocityY = entity.velocity.y + entity.acceleration.y * dt;
 
@@ -20,5 +18,5 @@ export const Kinematic = buildBehavior(
         entity.velocity.y = newVelocityY;
 
         entity.acceleration.zero();
-    }
-);
+    },
+});

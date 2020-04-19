@@ -4,28 +4,37 @@ import Vector from "victor";
 type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never;
 
 export type Entity<Behaviors extends Behavior = Behavior> = {
-    [K in keyof UnionToIntersection<Behaviors["properties"]>]: UnionToIntersection<Behaviors["properties"]>[K];
+    [K in keyof UnionToIntersection<ReturnType<Behaviors["properties"]>>]: UnionToIntersection<
+        ReturnType<Behaviors["properties"]>
+    >[K];
 } &
     InherentEntityProperties<Behaviors> & {
         behaviors: Behaviors[];
-        draw?(context: CanvasRenderingContext2D): void;
-        update?(dt: number): void;
+        draw(context: CanvasRenderingContext2D): void;
+        update(dt: number): void;
+        init(entity: Entity<Behaviors>): void;
     };
 
 interface InherentEntityProperties<Behaviors extends Behavior> {
     position: Vector;
     x: number;
     y: number;
-    hasBehavior<BehaviorCheck extends Behaviors>(behavior: BehaviorCheck): this is Entity<BehaviorCheck>;
+    hasBehavior<BehaviorCheck extends Behaviors>(behavior: BehaviorCheck): this is Entity<BehaviorCheck | Behaviors>;
 }
-export interface EntityDescription<Behaviors extends Behavior> {
+export interface EntityDescription<Behaviors extends Behavior, InitParams extends any[]> {
     behaviors: Behaviors[];
     draw?(entity: Entity<Behaviors>, context: CanvasRenderingContext2D): void;
     update?(entity: Entity<Behaviors>, dt: number): void;
+    init?(entity: Entity<Behaviors>, ...args: InitParams): void;
 }
 
-export function buildEntity<Behaviors extends Behavior>({ behaviors, draw, update }: EntityDescription<Behaviors>) {
-    return (x: number, y: number): Entity<Behaviors> => {
+export function buildEntity<Behaviors extends Behavior, InitParams extends any[]>({
+    behaviors,
+    draw,
+    update,
+    init,
+}: EntityDescription<Behaviors, InitParams>) {
+    return (x: number, y: number, ...initParams: InitParams): Entity<Behaviors> => {
         const entity = {
             behaviors,
             position: new Vector(x, y),
@@ -58,14 +67,25 @@ export function buildEntity<Behaviors extends Behavior>({ behaviors, draw, updat
                 }
             },
 
+            init() {
+                if (init) {
+                    init(entity as any, ...initParams);
+                }
+                entity.behaviors.forEach((behavior) => {
+                    behavior.init(entity as any);
+                });
+            },
+
             hasBehavior(behavior: Behaviors): boolean {
                 return this.behaviors.includes(behavior);
             },
         };
         behaviors.forEach((behavior) => {
-            Object.assign(entity, behavior.properties);
+            Object.assign(entity, behavior.properties());
             return entity;
         });
+
+        entity.init();
 
         return (entity as unknown) as Entity<Behaviors>;
     };

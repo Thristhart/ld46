@@ -25,6 +25,7 @@ blackCloudImage.src = blackCloudImageUrl;
 
 export const Bumper = buildEntity({
     behaviors: [Collidable, Circular, Bounce, Parental, Color],
+    name: "Bumper",
     init(entity, color: string) {
         entity.radius = 42;
         entity.color = color;

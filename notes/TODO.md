@@ -1,9 +1,8 @@
 -   Menu screen
 -   Death / game over
-    -   Global "ball" count
-    -   Falling decrements ball count
-    -   Falling respawns somehow?
-    -   After ball count hits 0, game over screen
+    -   Retry
+-   Play sunlight music when growing
 -   Victory? Or is it just score?
+    -   Should we stop input???
 -   Alternate controls
     -   Arrow keys, left/right shift, z/x, a/d, mobile touch UI

@@ -1,16 +1,19 @@
+import { BreakOnVictory } from "@behaviors/breakOnVictory";
 import { Circular } from "@behaviors/circular";
 import { Collidable } from "@behaviors/collidable";
 import { Flippy } from "@behaviors/flippy";
 import { Solid } from "@behaviors/solid";
 import { DEAD_PLANT_BROWN, FLIPPER_RADIUS_START, PLANT_GREEN } from "@constants";
+import { Flipper } from "@flipper";
 import { GamePhase, GameState } from "@global";
 import { buildEntity } from "./entity";
 
 export const FlipperCircle = buildEntity({
-    behaviors: [Collidable, Solid, Circular, Flippy],
-    init(entity, radius: number, speedMultiplier: number) {
+    behaviors: [Collidable, Solid, Circular, Flippy, BreakOnVictory],
+    init(entity, radius: number, speedMultiplier: number, flipper: Flipper) {
         entity.radius = radius;
-        (entity as any).speedMultiplier = speedMultiplier;
+        entity.speedMultiplier = speedMultiplier;
+        entity.myFlipper = flipper;
     },
     draw(entity, context) {
         context.strokeStyle = GameState.phase === GamePhase.GameOver ? DEAD_PLANT_BROWN : PLANT_GREEN;

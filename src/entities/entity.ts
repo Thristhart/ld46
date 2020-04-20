@@ -16,6 +16,7 @@ export type Entity<Behaviors extends Behavior = Behavior> = {
         draw(context: CanvasRenderingContext2D): void;
         update(dt: number): void;
         init(entity: Entity<Behaviors>): void;
+        name?: string;
     };
 
 interface InherentEntityProperties<Behaviors> {
@@ -30,6 +31,7 @@ export interface EntityDescription<Behaviors extends Behavior, InitParams extend
     draw?(entity: Entity<Behaviors>, context: CanvasRenderingContext2D): void;
     update?(entity: Entity<Behaviors>, dt: number): void;
     init?(entity: Entity<Behaviors>, ...args: InitParams): void;
+    name?: string;
 }
 
 function navigateDependencyTree(rootBehavior: Behavior, behaviorSet: Set<Behavior>) {
@@ -46,6 +48,7 @@ export function buildEntity<Behaviors extends Behavior, InitParams extends any[]
     draw,
     update,
     init,
+    name,
 }: EntityDescription<Behaviors, InitParams>) {
     return (x: number, y: number, ...initParams: InitParams): Entity<Behaviors> => {
         const behaviorSet = new Set<Behavior>();
@@ -55,6 +58,7 @@ export function buildEntity<Behaviors extends Behavior, InitParams extends any[]
         const entity = {
             behaviors: Array.from(behaviorSet),
             position: new Vector(x, y),
+            name,
 
             get x() {
                 return this.position.x;

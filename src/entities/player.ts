@@ -4,7 +4,8 @@ import { Circular } from "@behaviors/circular";
 import { Collidable } from "@behaviors/collidable";
 import { Gravity } from "@behaviors/gravity";
 import { Kinematic } from "@behaviors/kinematic";
-import { GamePhase, GameState } from "@global";
+import { Solid } from "@behaviors/solid";
+import { entities, GamePhase, GameState } from "@global";
 import { waterGauge } from "@index";
 import { buildEntity } from "./entity";
 
@@ -25,9 +26,16 @@ export const Player = buildEntity({
     },
     update(entity, dt) {
         if (entity.y > 300) {
+            if (entity.radius >= 80) {
+                GameState.phase = GamePhase.Victory;
+                AudioController.sounds.victory.play();
+                return;
+            }
             AudioController.sounds.falling.play();
             if (ballCount === 0) {
                 GameState.phase = GamePhase.GameOver;
+                AudioController.sounds.gameOver.play();
+                return;
             } else {
                 ballCount -= 1;
                 GameState.phase = GamePhase.Died;
@@ -44,12 +52,24 @@ export const Player = buildEntity({
                 inSunlight = true;
             }
         }
-        if (waterGauge.currentValue > 0 && inSunlight) {
-            waterGauge.currentValue -= 0.02;
-            entity.radius += 0.04;
-        } else {
-            if (entity.radius > 10 && entity.radius < 80) {
-                entity.radius -= 0.002;
+        if (entity.radius <= 80) {
+            if (waterGauge.currentValue > 0 && inSunlight) {
+                waterGauge.currentValue -= 0.02;
+                entity.radius += 0.04;
+                if (entity.radius >= 80) {
+                    // make the bumpers not bounce anymore
+                    entities.forEach((ent) => {
+                        if (ent.name === "Bumper") {
+                            ent.behaviors = ent.behaviors.filter(
+                                (behavior) => behavior !== Solid && behavior !== Bounce && behavior !== Collidable
+                            );
+                        }
+                    });
+                }
+            } else {
+                if (entity.radius > 10) {
+                    entity.radius -= 0.002;
+                }
             }
         }
 

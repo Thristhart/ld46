@@ -1,3 +1,4 @@
+import gameOverSrc from "@assets/epic_fail.mp3";
 import fallingSrc from "@assets/falling.mp3";
 import leftDownSrc from "@assets/LFlipDwn.wav";
 import leftUpSrc from "@assets/LFlipUp.wav";
@@ -6,6 +7,7 @@ import rightDownSrc from "@assets/RFlipDwn.wav";
 import rightUpSrc from "@assets/RFlipUp.wav";
 import bgMusicSrc from "@assets/rock and roll baby.mp3";
 import splashSrc from "@assets/splash.mp3";
+import victorySrc from "@assets/victory.mp3";
 import { CollisionDescription } from "@behaviors/collidable";
 import { Kinematic } from "@behaviors/kinematic";
 import { ARENA_HEIGHT, ARENA_WIDTH } from "@constants";
@@ -47,6 +49,14 @@ export const AudioController = {
         falling: new Howl({
             src: fallingSrc,
         }),
+        victory: new Howl({
+            src: victorySrc,
+            volume: 0.1,
+        }),
+        gameOver: new Howl({
+            src: gameOverSrc,
+            volume: 0.1,
+        }),
     },
     get volume() {
         return Howler.volume();
@@ -74,6 +84,7 @@ export const AudioController = {
     },
 
     playBgMusic() {
+        AudioController.volume = 0.4;
         AudioController.sounds.bgMusic.play();
     },
 };

@@ -77,8 +77,8 @@ export let leftFlipper: Flipper;
 export let rightFlipper: Flipper;
 
 export function setup() {
-    GameState.phase = GamePhase.GameOver;
-    player = Player(60, -60);
+    GameState.phase = GamePhase.Intro;
+    player = Player(-70, -100);
     entities.push(player);
 
     const bottomLeftCorner = FixedSegment(-ARENA_WIDTH / 6, 0, -ARENA_WIDTH / 2, -ARENA_HEIGHT / 6, 0.65);

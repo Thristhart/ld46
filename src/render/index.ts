@@ -102,6 +102,9 @@ export const render = (dt: number) => {
             overlayText(`Press a flipper to continue`, -180, -448);
         }
     }
+    if (GameState.phase === GamePhase.GameOver) {
+        overlayText("GAME OVER", -80, -500);
+    }
 
     context.restore();
 

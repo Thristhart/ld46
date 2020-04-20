@@ -12,6 +12,7 @@ export enum GamePhase {
     Standard,
     Died,
     GameOver,
+    Victory,
 }
 export const GameState = {
     phase: GamePhase.Intro,

@@ -1,6 +1,5 @@
 import { AudioController } from "@audio";
 import { findClosestPoint } from "@behaviors/collidable";
-import { Flippy } from "@behaviors/flippy";
 import {
     FIXED_TIMESTEP,
     FLIPPER_ANGULAR_SPEED,
@@ -8,7 +7,6 @@ import {
     FLIPPER_RADIUS_END,
     FLIPPER_RADIUS_START,
 } from "@constants";
-import { Entity } from "@entities/entity";
 import { FlipperCircle } from "@entities/flipperCircle";
 import { FlipperLine } from "@entities/flipperLine";
 import { FlipperVisual } from "@entities/flipperVisual";
@@ -38,12 +36,13 @@ export class Flipper {
     startCircle: ReturnType<typeof FlipperCircle>;
     endCircle: ReturnType<typeof FlipperCircle>;
     visual: ReturnType<typeof FlipperVisual>;
+    broken = false;
 
     constructor(public x: number, public y: number, public isLeft: boolean) {
-        this.topLine = FlipperLine(x, y, x, y);
-        this.bottomLine = FlipperLine(x, y, x, y);
-        this.startCircle = FlipperCircle(x, y, FLIPPER_RADIUS_START, 0);
-        this.endCircle = FlipperCircle(x, y, FLIPPER_RADIUS_END, defaultFlipperSpeedMultiplier);
+        this.topLine = FlipperLine(x, y, x, y, this);
+        this.bottomLine = FlipperLine(x, y, x, y, this);
+        this.startCircle = FlipperCircle(x, y, FLIPPER_RADIUS_START, 0, this);
+        this.endCircle = FlipperCircle(x, y, FLIPPER_RADIUS_END, defaultFlipperSpeedMultiplier, this);
         this.visual = FlipperVisual(x, y);
         entities.push(this.visual);
         entities.push(this.topLine);
@@ -66,8 +65,8 @@ export class Flipper {
         const startRadiusVector = normal.clone().multiplyScalar(FLIPPER_RADIUS_START);
         const endRadiusVector = normal.clone().multiplyScalar(FLIPPER_RADIUS_END);
 
-        (this.topLine as any).isLeft = this.isLeft;
-        (this.bottomLine as any).isLeft = this.isLeft;
+        this.topLine.isLeft = this.isLeft;
+        this.bottomLine.isLeft = this.isLeft;
 
         this.visual.angle = this.angle;
 
@@ -137,16 +136,16 @@ export class Flipper {
 
             this.angle -= speed;
 
-            ((this.topLine as unknown) as Entity<typeof Flippy>).angularSpeed = speed * (this.isLeft ? 1 : -1);
-            ((this.bottomLine as unknown) as Entity<typeof Flippy>).angularSpeed = speed * (this.isLeft ? -1 : 1);
-            ((this.startCircle as unknown) as Entity<typeof Flippy>).angularSpeed = speed * (this.isLeft ? 1 : -1);
-            ((this.endCircle as unknown) as Entity<typeof Flippy>).angularSpeed = speed * (this.isLeft ? -1 : 1);
+            this.topLine.angularSpeed = speed * (this.isLeft ? 1 : -1);
+            this.bottomLine.angularSpeed = speed * (this.isLeft ? -1 : 1);
+            this.startCircle.angularSpeed = speed * (this.isLeft ? 1 : -1);
+            this.endCircle.angularSpeed = speed * (this.isLeft ? -1 : 1);
             if (Math.abs(distance) < FLIPPER_ANGULAR_SPEED) {
                 this.angle = angle;
-                ((this.topLine as unknown) as Entity<typeof Flippy>).angularSpeed = 0;
-                ((this.bottomLine as unknown) as Entity<typeof Flippy>).angularSpeed = 0;
-                ((this.startCircle as unknown) as Entity<typeof Flippy>).angularSpeed = 0;
-                ((this.endCircle as unknown) as Entity<typeof Flippy>).angularSpeed = 0;
+                this.topLine.angularSpeed = 0;
+                this.bottomLine.angularSpeed = 0;
+                this.startCircle.angularSpeed = 0;
+                this.endCircle.angularSpeed = 0;
                 clearInterval(this.transitionInterval);
                 this.transitionInterval = undefined;
             }
@@ -163,12 +162,12 @@ export class Flipper {
 
     flipUp() {
         if (this.isLeft) {
-            if (this.angle !== LEFT_FLIPPER_ENDANGLE) {
+            if (!this.broken && this.angle !== LEFT_FLIPPER_ENDANGLE) {
                 this.transitionToAngle(LEFT_FLIPPER_ENDANGLE);
                 AudioController.sounds.flipper.leftUp.play();
             }
         } else {
-            if (this.angle !== RIGHT_FLIPPER_ENDANGLE) {
+            if (!this.broken && this.angle !== RIGHT_FLIPPER_ENDANGLE) {
                 this.transitionToAngle(RIGHT_FLIPPER_ENDANGLE);
                 AudioController.sounds.flipper.rightUp.play();
             }
@@ -176,12 +175,12 @@ export class Flipper {
     }
     flipDown() {
         if (this.isLeft) {
-            if (this.angle !== LEFT_FLIPPER_STARTANGLE || this.transitionInterval !== undefined) {
+            if ((!this.broken && this.angle !== LEFT_FLIPPER_STARTANGLE) || this.transitionInterval !== undefined) {
                 this.transitionToAngle(LEFT_FLIPPER_STARTANGLE);
                 AudioController.sounds.flipper.leftDown.play();
             }
         } else {
-            if (this.angle !== RIGHT_FLIPPER_STARTANGLE || this.transitionInterval !== undefined) {
+            if ((!this.broken && this.angle !== RIGHT_FLIPPER_STARTANGLE) || this.transitionInterval !== undefined) {
                 this.transitionToAngle(RIGHT_FLIPPER_STARTANGLE);
                 AudioController.sounds.flipper.rightDown.play();
             }

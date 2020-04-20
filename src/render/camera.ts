@@ -1,8 +1,8 @@
-import { buildEntity } from "@entities/entity";
 import { buildBehavior } from "@behaviors/behavior";
-import { player } from "@global";
-import { canvas } from "@render";
 import { ARENA_HEIGHT, ARENA_WIDTH } from "@constants";
+import { buildEntity } from "@entities/entity";
+import { player } from "@index";
+import { canvas } from "@render";
 
 const Scalable = buildBehavior({
     properties: () => ({

@@ -1,16 +1,14 @@
+import { debugVector } from "@entities/debugVectorParticle";
+import { defaultFlipperSpeedMultiplier } from "@global";
 import { buildBehavior } from "./behavior";
+import { Circular } from "./circular";
 import { Collidable, findClosestPoint } from "./collidable";
 import { Kinematic } from "./kinematic";
-import Vector from "victor";
-import { Wall } from "./wall";
-import { Circular } from "./circular";
 import { LineSegment } from "./lineSegment";
-import { defaultFlipperSpeedMultiplier, entities } from "@global";
-import { DebugVectorParticle } from "@entities/debugVectorParticle";
 
 export const Flippy = buildBehavior({
+    dependencies: [Collidable],
     properties: () => ({
-        ...Collidable.properties(),
         angularSpeed: 0,
         speedMultiplier: defaultFlipperSpeedMultiplier,
         isLeft: false,
@@ -34,7 +32,7 @@ export const Flippy = buildBehavior({
                         .multiplyScalar(
                             -(Math.abs(me.angularSpeed) * me.speedMultiplier * distanceFromOrigin) / length
                         );
-                    entities.push(DebugVectorParticle(closestPoint.x, closestPoint.y, paddleVelocity, "blue"));
+                    debugVector(closestPoint.x, closestPoint.y, paddleVelocity, "blue");
                     entCollidingWith.velocity.add(paddleVelocity);
                     return;
                 }
@@ -45,7 +43,7 @@ export const Flippy = buildBehavior({
 
                     const speed = -Math.abs(me.angularSpeed) * me.speedMultiplier;
                     const paddleVelocity = direction.multiplyScalar(speed);
-                    entities.push(DebugVectorParticle(me.position.x, me.position.y, paddleVelocity, "red"));
+                    debugVector(me.position.x, me.position.y, paddleVelocity, "red");
                     entCollidingWith.velocity.add(paddleVelocity);
                     return;
                 }

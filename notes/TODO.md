@@ -1,0 +1,9 @@
+-   Menu screen
+-   Death / game over
+    -   Global "ball" count
+    -   Falling decrements ball count
+    -   Falling respawns somehow?
+    -   After ball count hits 0, game over screen
+-   Victory? Or is it just score?
+-   Alternate controls
+    -   Arrow keys, left/right shift, z/x, a/d, mobile touch UI

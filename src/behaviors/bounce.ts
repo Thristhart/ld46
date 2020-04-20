@@ -1,14 +1,14 @@
-import { buildBehavior } from "./behavior";
-import { Collidable, CollisionDescription } from "./collidable";
-import { Kinematic } from "./kinematic";
-import Vector from "victor";
-import { Wall } from "./wall";
-import { Circular } from "./circular";
-import { LineSegment } from "./lineSegment";
-import { entities } from "@global";
-import { DebugVectorParticle } from "@entities/debugVectorParticle";
+import { debugVector } from "@entities/debugVectorParticle";
 import { Entity } from "@entities/entity";
+import Vector from "victor";
+import { buildBehavior } from "./behavior";
+import { Circular } from "./circular";
+import { Collidable, CollisionDescription } from "./collidable";
 import { Flippy } from "./flippy";
+import { Kinematic } from "./kinematic";
+import { LineSegment } from "./lineSegment";
+import { Solid } from "./solid";
+import { Wall } from "./wall";
 
 function getSideOfVector(startPoint: Vector, endPoint: Vector, point: Vector) {
     const sample =
@@ -19,7 +19,7 @@ function getSideOfVector(startPoint: Vector, endPoint: Vector, point: Vector) {
     return false;
 }
 
-function resolveWallAndCircleCollision(
+function bounceCircleOffWall(
     wall: Entity<typeof Wall | typeof LineSegment | typeof Bounce>,
     circle: Entity<typeof Kinematic | typeof Circular | typeof Bounce>,
     collision: CollisionDescription
@@ -49,26 +49,14 @@ function resolveWallAndCircleCollision(
 
         const bounceVelocity = bounceVector.clone().multiplyScalar(1 + circle.bounceFactor * otherBounceFactor);
         circle.velocity.add(bounceVelocity);
-        entities.push(
-            DebugVectorParticle(
-                collision.closestPointOnLine.x,
-                collision.closestPointOnLine.y,
-                bounceVelocity,
-                "purple"
-            )
-        );
-        entities.push(DebugVectorParticle(circle.position.x, circle.position.y, circle.velocity, "cyan"));
+        debugVector(collision.closestPointOnLine.x, collision.closestPointOnLine.y, bounceVelocity, "purple");
+        debugVector(circle.position.x, circle.position.y, circle.velocity, "cyan");
     }
-    const diff = circle.position.clone().subtract(collision.closestPointOnLine);
-    const diffNormal = wall.normal.clone().multiplyScalar(-1);
-    diff.subtract(diffNormal.clone().multiplyScalar(circle.radius * 1.01)).multiplyScalar(-1);
-
-    circle.position.add(diff);
 }
 
 export const Bounce = buildBehavior({
+    dependencies: [Collidable, Solid],
     properties: () => ({
-        ...Collidable.properties(),
         bounceFactor: 0.8,
         minAdditionalSpeed: 0,
     }),
@@ -78,13 +66,12 @@ export const Bounce = buildBehavior({
             if (me.hasBehavior(Kinematic) && me.hasBehavior(Circular)) {
                 if (
                     entCollidingWith.hasBehavior(Circular) &&
+                    entCollidingWith.hasBehavior(Solid) &&
                     (!entCollidingWith.hasBehavior(Flippy) || entCollidingWith.angularSpeed == 0)
                 ) {
                     const AtB: Vector = me.position.clone().subtract(entCollidingWith.position);
 
                     const midPoint = AtB.clone().normalize().invert().multiplyScalar(entCollidingWith.radius);
-
-                    const minDistance = entCollidingWith.radius + me.radius;
 
                     const tangent = new Vector(-AtB.y, AtB.x);
 
@@ -120,24 +107,12 @@ export const Bounce = buildBehavior({
                         bounceVelocity.add(bounceVector.clone().multiplyScalar(me.minAdditionalSpeed + otherMinSpeed));
                         me.velocity.add(bounceVelocity);
 
-                        entities.push(
-                            DebugVectorParticle(
-                                entCollidingWith.position.x,
-                                entCollidingWith.position.y,
-                                bounceVelocity,
-                                "green"
-                            )
-                        );
+                        debugVector(entCollidingWith.position.x, entCollidingWith.position.y, bounceVelocity, "green");
                     }
-
-                    const diff = AtB.clone().normalize().multiplyScalar(minDistance).subtract(AtB);
-
-                    me.position.add(diff);
-                    return;
                 }
             } else if (me.hasBehavior(Wall) || me.hasBehavior(LineSegment)) {
                 if (entCollidingWith.hasBehavior(Kinematic) && entCollidingWith.hasBehavior(Circular)) {
-                    resolveWallAndCircleCollision(me as any, entCollidingWith as any, collision);
+                    bounceCircleOffWall(me as any, entCollidingWith as any, collision);
                 }
             }
         }

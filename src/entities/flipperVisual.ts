@@ -1,8 +1,9 @@
-import { buildEntity } from "./entity";
 import { LineSegment } from "@behaviors/lineSegment";
-import Vector from "victor";
 import { Rotatable } from "@behaviors/rotatable";
-import { FLIPPER_LENGTH, FLIPPER_RADIUS_START, FLIPPER_RADIUS_END, PLANT_GREEN } from "@constants";
+import { DEAD_PLANT_BROWN, FLIPPER_LENGTH, FLIPPER_RADIUS_END, FLIPPER_RADIUS_START, PLANT_GREEN } from "@constants";
+import { GamePhase } from "@global";
+import Vector from "victor";
+import { buildEntity } from "./entity";
 
 export const FlipperVisual = buildEntity({
     behaviors: [LineSegment, Rotatable],
@@ -13,7 +14,7 @@ export const FlipperVisual = buildEntity({
         const startRadiusVector = normal.clone().multiplyScalar(FLIPPER_RADIUS_START);
         const endRadiusVector = normal.clone().multiplyScalar(FLIPPER_RADIUS_END);
 
-        context.fillStyle = PLANT_GREEN;
+        context.fillStyle = GamePhase.GameOver ? DEAD_PLANT_BROWN : PLANT_GREEN;
         context.beginPath();
         context.moveTo(entity.x + startRadiusVector.x, entity.y + startRadiusVector.y);
         context.lineTo(

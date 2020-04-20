@@ -1,27 +1,35 @@
-import { FlipperLine } from "@entities/flipperLine";
-import { entities, defaultFlipperSpeedMultiplier, player } from "@global";
+import { AudioController } from "@audio";
+import { findClosestPoint } from "@behaviors/collidable";
+import { Flippy } from "@behaviors/flippy";
 import {
     FIXED_TIMESTEP,
-    FLIPPER_RADIUS_START,
-    FLIPPER_RADIUS_END,
-    FLIPPER_LENGTH,
     FLIPPER_ANGULAR_SPEED,
+    FLIPPER_LENGTH,
+    FLIPPER_RADIUS_END,
+    FLIPPER_RADIUS_START,
 } from "@constants";
 import { Entity } from "@entities/entity";
-import { Flippy } from "@behaviors/flippy";
-import Vector from "victor";
 import { FlipperCircle } from "@entities/flipperCircle";
-import { findClosestPoint } from "@behaviors/collidable";
+import { FlipperLine } from "@entities/flipperLine";
 import { FlipperVisual } from "@entities/flipperVisual";
+import { defaultFlipperSpeedMultiplier, entities } from "@global";
+import { player } from "@index";
+import Vector from "victor";
 
 function mod(a: number, n: number) {
     return ((a % n) + n) % n;
 }
 
-function distanceBetweenAngles(targetA: number, sourceA: number) {
+export function distanceBetweenAngles(targetA: number, sourceA: number) {
     const angle = mod(targetA - sourceA, Math.PI * 2);
     return mod(angle + Math.PI, Math.PI * 2) - Math.PI;
 }
+
+const LEFT_FLIPPER_STARTANGLE = Math.PI / 5;
+const LEFT_FLIPPER_ENDANGLE = -LEFT_FLIPPER_STARTANGLE;
+
+const RIGHT_FLIPPER_STARTANGLE = Math.PI - LEFT_FLIPPER_STARTANGLE;
+const RIGHT_FLIPPER_ENDANGLE = Math.PI - LEFT_FLIPPER_ENDANGLE;
 
 export class Flipper {
     private internalAngle = Math.PI / 4;
@@ -43,7 +51,11 @@ export class Flipper {
         entities.push(this.startCircle);
         entities.push(this.endCircle);
 
-        this.calculateComponentPropertiesFromAngle();
+        if (this.isLeft) {
+            this.angle = LEFT_FLIPPER_STARTANGLE;
+        } else {
+            this.angle = RIGHT_FLIPPER_STARTANGLE;
+        }
     }
 
     calculateComponentPropertiesFromAngle() {
@@ -114,7 +126,6 @@ export class Flipper {
                         collider.endPoint.clone(),
                         player.position.clone()
                     );
-                    console.log(closestPoint);
                     player.position.copy(closestPoint);
                     (player as any).velocity.add(
                         collider.normal.clone().multiplyScalar((-speed * (collider as any).speedMultiplier) / 10)
@@ -137,6 +148,7 @@ export class Flipper {
                 ((this.startCircle as unknown) as Entity<typeof Flippy>).angularSpeed = 0;
                 ((this.endCircle as unknown) as Entity<typeof Flippy>).angularSpeed = 0;
                 clearInterval(this.transitionInterval);
+                this.transitionInterval = undefined;
             }
         }, FIXED_TIMESTEP);
     }
@@ -147,5 +159,32 @@ export class Flipper {
     set angle(newAngle: number) {
         this.internalAngle = newAngle;
         this.calculateComponentPropertiesFromAngle();
+    }
+
+    flipUp() {
+        if (this.isLeft) {
+            if (this.angle !== LEFT_FLIPPER_ENDANGLE) {
+                this.transitionToAngle(LEFT_FLIPPER_ENDANGLE);
+                AudioController.sounds.flipper.leftUp.play();
+            }
+        } else {
+            if (this.angle !== RIGHT_FLIPPER_ENDANGLE) {
+                this.transitionToAngle(RIGHT_FLIPPER_ENDANGLE);
+                AudioController.sounds.flipper.rightUp.play();
+            }
+        }
+    }
+    flipDown() {
+        if (this.isLeft) {
+            if (this.angle !== LEFT_FLIPPER_STARTANGLE || this.transitionInterval !== undefined) {
+                this.transitionToAngle(LEFT_FLIPPER_STARTANGLE);
+                AudioController.sounds.flipper.leftDown.play();
+            }
+        } else {
+            if (this.angle !== RIGHT_FLIPPER_STARTANGLE || this.transitionInterval !== undefined) {
+                this.transitionToAngle(RIGHT_FLIPPER_STARTANGLE);
+                AudioController.sounds.flipper.rightDown.play();
+            }
+        }
     }
 }

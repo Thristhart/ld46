@@ -1,8 +1,9 @@
-import { buildEntity } from "./entity";
+import { Color } from "@behaviors/color";
 import { Decay } from "@behaviors/decay";
 import { LineSegment } from "@behaviors/lineSegment";
+import { entities } from "@global";
 import Vector from "victor";
-import { Color } from "@behaviors/color";
+import { buildEntity } from "./entity";
 
 export const DebugVectorParticle = buildEntity({
     behaviors: [Decay, LineSegment, Color],
@@ -14,6 +15,7 @@ export const DebugVectorParticle = buildEntity({
         if (!localStorage.getItem("debug")) {
             return;
         }
+        context.lineWidth = 1;
         context.strokeStyle = entity.color;
         context.beginPath();
         context.moveTo(entity.x, entity.y);
@@ -27,3 +29,10 @@ export const DebugVectorParticle = buildEntity({
         context.stroke();
     },
 });
+
+export const debugVector = (x: number, y: number, vector: Vector, color = "red") => {
+    if (!localStorage.getItem("debug")) {
+        return;
+    }
+    entities.push(DebugVectorParticle(x, y, vector, color));
+};

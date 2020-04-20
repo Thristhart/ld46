@@ -1,14 +1,26 @@
-import { buildEntity } from "./entity";
-import { Collidable } from "@behaviors/collidable";
-import { Wall } from "@behaviors/wall";
+import { AudioController } from "@audio";
 import { Bounce } from "@behaviors/bounce";
+import { Collidable } from "@behaviors/collidable";
+import { Solid } from "@behaviors/solid";
+import { Wall } from "@behaviors/wall";
+import { player } from "@index";
+import { buildEntity } from "./entity";
 
 export const OuterWall = buildEntity({
-    behaviors: [Collidable, Bounce, Wall],
+    behaviors: [Collidable, Solid, Bounce, Wall],
     init(entity, toX: number, toY: number, bounceFactor: number) {
         entity.endPoint.x = toX;
         entity.endPoint.y = toY;
         (entity as any).bounceFactor = bounceFactor;
+    },
+    update(entity) {
+        entity.collidingWith.forEach((collision) => {
+            if (collision.ent === player) {
+                if (entity.hasBehavior(Wall)) {
+                    AudioController.playSoundForCollision(collision);
+                }
+            }
+        });
     },
     draw(entity, context) {
         context.strokeStyle = "black";

@@ -1,5 +1,7 @@
 import gameOverSrc from "@assets/epic_fail.mp3";
 import fallingSrc from "@assets/falling.mp3";
+import flipperBreakSrc from "@assets/flipper_die.mp3";
+import flipOrDieSrc from "@assets/flip_or_die.mp3";
 import leftDownSrc from "@assets/LFlipDwn.wav";
 import leftUpSrc from "@assets/LFlipUp.wav";
 import pinballHitSrc from "@assets/pinball_hit.wav";
@@ -49,6 +51,10 @@ export const AudioController = {
         falling: new Howl({
             src: fallingSrc,
         }),
+        flipperBreak: new Howl({
+            src: flipperBreakSrc,
+            volume: 0.7,
+        }),
         victory: new Howl({
             src: victorySrc,
             volume: 0.1,
@@ -56,6 +62,9 @@ export const AudioController = {
         gameOver: new Howl({
             src: gameOverSrc,
             volume: 0.1,
+        }),
+        flipOrDie: new Howl({
+            src: flipOrDieSrc,
         }),
     },
     get volume() {
@@ -84,10 +93,13 @@ export const AudioController = {
     },
 
     playBgMusic() {
-        AudioController.volume = 0.4;
+        //AudioController.volume = 0.4;
         AudioController.sounds.bgMusic.play();
     },
 };
+
+Howler.autoUnlock = false;
+Howler.autoSuspend = false;
 
 AudioController.volume = 0.4;
 
@@ -95,3 +107,15 @@ AudioController.sounds.flipper.leftDown.pos(-0.7, 0, 0);
 AudioController.sounds.flipper.leftUp.pos(-0.7, 0, 0);
 AudioController.sounds.flipper.rightDown.pos(0.7, 0, 0);
 AudioController.sounds.flipper.rightUp.pos(0.7, 0, 0);
+
+let muted = false;
+const toggle = document.getElementById("muteToggle");
+toggle.addEventListener("click", () => {
+    muted = !muted;
+    if (muted) {
+        toggle.innerHTML = "🔈";
+    } else {
+        toggle.innerHTML = "🔊";
+    }
+    Howler.mute(muted);
+});

@@ -10,3 +10,12 @@ body {
     bottom: 0;
     background-color: #186966;
 }
+
+#muteToggle {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 2rem;
+    background-color: transparent;
+    border: none;
+}

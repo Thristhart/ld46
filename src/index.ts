@@ -50,7 +50,13 @@ const gameLoop = () => {
             ent.update(dt);
         });
     } else {
-        AudioController.sounds.bgMusic.stop();
+        if (
+            GameState.phase === GamePhase.Died ||
+            GameState.phase === GamePhase.GameOver ||
+            GameState.phase === GamePhase.Victory
+        ) {
+            AudioController.sounds.bgMusic.stop();
+        }
         camera.update(dt);
     }
 
@@ -77,7 +83,7 @@ export let leftFlipper: Flipper;
 export let rightFlipper: Flipper;
 
 export function setup() {
-    GameState.phase = GamePhase.Intro;
+    GameState.phase = GamePhase.MenuScreen;
     player = Player(-70, -100);
     entities.push(player);
 
@@ -242,6 +248,14 @@ const DIED_PHASE_PAUSE = 15;
 
 const Input = {
     onLeftDown() {
+        if (GameState.phase === GamePhase.MenuScreen) {
+            GameState.phase = GamePhase.MenuScreenAnimation;
+            AudioController.sounds.flipOrDie.play();
+            return;
+        }
+        if (GameState.phase === GamePhase.MenuScreenAnimation) {
+            return;
+        }
         if (GameState.phase === GamePhase.Intro) {
             GameState.phase = GamePhase.Standard;
         }
@@ -255,6 +269,14 @@ const Input = {
         leftFlipper.flipUp();
     },
     onRightDown() {
+        if (GameState.phase === GamePhase.MenuScreen) {
+            GameState.phase = GamePhase.MenuScreenAnimation;
+            AudioController.sounds.flipOrDie.play();
+            return;
+        }
+        if (GameState.phase === GamePhase.MenuScreenAnimation) {
+            return;
+        }
         if (GameState.phase === GamePhase.Intro) {
             GameState.phase = GamePhase.Standard;
         }
@@ -295,6 +317,51 @@ window.addEventListener("mouseup", (event) => {
         event.preventDefault();
     }
 });
+
+window.addEventListener("keydown", (event) => {
+    if (event.code === "KeyZ" || event.code === "ShiftLeft" || event.code === "ArrowLeft") {
+        Input.onLeftDown();
+        event.preventDefault();
+    }
+
+    if (event.code === "KeyX" || event.code === "ShiftRight" || event.code === "ArrowRight") {
+        Input.onRightDown();
+        event.preventDefault();
+    }
+});
+
+window.addEventListener("keyup", (event) => {
+    if (event.code === "KeyZ" || event.code === "ShiftLeft" || event.code === "ArrowLeft") {
+        Input.onLeftUp();
+        event.preventDefault();
+    }
+
+    if (event.code === "KeyX" || event.code === "ShiftRight" || event.code === "ArrowRight") {
+        Input.onRightUp();
+        event.preventDefault();
+    }
+});
+
+window.addEventListener("touchstart", (event) => {
+    for (const touch of event.changedTouches) {
+        if (touch.pageX < window.innerWidth / 2) {
+            Input.onLeftDown();
+        } else {
+            Input.onRightDown();
+        }
+    }
+});
+
+window.addEventListener("touchend", (event) => {
+    for (const touch of event.changedTouches) {
+        if (touch.pageX < window.innerWidth / 2) {
+            Input.onLeftUp();
+        } else {
+            Input.onRightUp();
+        }
+    }
+});
+
 window.addEventListener("contextmenu", (event) => {
     event.preventDefault();
 });

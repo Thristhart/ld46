@@ -8,6 +8,8 @@ export const defaultFlipperSpeedMultiplier = 400;
 window.debug = { entities };
 
 export enum GamePhase {
+    MenuScreen,
+    MenuScreenAnimation,
     Intro,
     Standard,
     Died,

@@ -1,8 +1,3 @@
 -   Menu screen
 -   Death / game over
     -   Retry
--   Play sunlight music when growing
--   Victory? Or is it just score?
-    -   Should we stop input???
--   Alternate controls
-    -   Arrow keys, left/right shift, z/x, a/d, mobile touch UI

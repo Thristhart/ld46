@@ -1,3 +1,4 @@
+import { AudioController } from "@audio";
 import { Flipper } from "@flipper";
 import { player } from "@index";
 import { buildBehavior } from "./behavior";
@@ -12,6 +13,9 @@ export const BreakOnVictory = buildBehavior({
         for (const collision of entity.collidingWith) {
             if (collision.ent === player) {
                 if (player.radius >= 80) {
+                    if (!entity.myFlipper.broken) {
+                        AudioController.sounds.flipperBreak.play();
+                    }
                     entity.myFlipper.broken = true;
                     entity.myFlipper.transitionToAngle(Math.PI / 2);
                 }

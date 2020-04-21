@@ -27,6 +27,7 @@ export const Player = buildEntity({
     update(entity, dt) {
         if (entity.y > 300) {
             if (entity.radius >= 80) {
+                GameState.timeOnCurrentPhase = 0;
                 GameState.phase = GamePhase.Victory;
                 AudioController.sounds.victory.play();
                 return;
@@ -56,6 +57,7 @@ export const Player = buildEntity({
             if (waterGauge.currentValue > 0 && inSunlight) {
                 waterGauge.currentValue -= 0.02;
                 entity.radius += 0.04;
+
                 if (entity.radius >= 80) {
                     // make the bumpers not bounce anymore
                     entities.forEach((ent) => {

@@ -1,3 +1,7 @@
+import flipOrDieSrc from "@assets/fliporDIE_small.png";
+import victoryPlant1Src from "@assets/plant_grow1.png";
+import victoryPlant2Src from "@assets/plant_grow2.png";
+import victoryPlant3Src from "@assets/plant_grow3.png";
 import { ARENA_HEIGHT, ARENA_WIDTH } from "@constants";
 import { ballCount } from "@entities/player";
 import { entities, GamePhase, GameState } from "@global";
@@ -34,6 +38,21 @@ gameOverFieldBackground.src = gameOverFieldBackgroundImageUrl;
 const sunlight = new Image();
 sunlight.src = sunlightImageUrl;
 
+const victoryPlant1 = new Image();
+victoryPlant1.src = victoryPlant1Src;
+
+const victoryPlant2 = new Image();
+victoryPlant2.src = victoryPlant2Src;
+
+const victoryPlant3 = new Image();
+victoryPlant3.src = victoryPlant3Src;
+
+const VICTORY_PLANT_WIDTH = 362 * 2;
+const VICTORY_PLANT_HEIGHT = 295 * 2;
+
+const flipOrDie = new Image();
+flipOrDie.src = flipOrDieSrc;
+
 const basicFont = `"Segoe UI",Segoe,Tahoma,Arial,Verdana,sans-serif`;
 
 export const overlayText = (text: string, x: number, y: number) => {
@@ -67,6 +86,8 @@ export const render = (dt: number) => {
         context.drawImage(background, -BG_IMAGE_WIDTH / 2 - 10, -ARENA_HEIGHT + 20, BG_IMAGE_WIDTH, BG_IMAGE_HEIGHT);
     }
 
+    context.drawImage(flipOrDie, -860 / 2, -ARENA_HEIGHT - 220);
+
     player.draw(context);
 
     context.drawImage(sunlight, -ARENA_WIDTH / 2, -ARENA_HEIGHT, ARENA_WIDTH, ARENA_HEIGHT);
@@ -85,13 +106,26 @@ export const render = (dt: number) => {
         context.arc(ballCountX + i * 40, ballCountY + 20, 20, 0, Math.PI * 2);
         context.fill();
     }
+    if (GameState.phase === GamePhase.MenuScreen || GameState.phase === GamePhase.MenuScreenAnimation) {
+        if (window.matchMedia("(pointer: coarse)").matches) {
+            overlayText("Touch anywhere to begin", -170, -ARENA_HEIGHT + 32);
+        } else {
+            overlayText("Press any key to begin", -160, -ARENA_HEIGHT + 32);
+        }
+    }
 
     if (GameState.phase === GamePhase.Intro) {
-        overlayText("Press X, Right Shift,", 100, 64);
-        overlayText("Right Arrow or Right Click", 100, 96);
+        if (window.matchMedia("(pointer: coarse)").matches) {
+            overlayText("Touch the left side", 100, 100);
 
-        overlayText("Press Z, Left Shift,", -400, 64);
-        overlayText("Left Arrow or Left Click", -400, 96);
+            overlayText("Touch the right side", -400, 100);
+        } else {
+            overlayText("Press X, Right Shift,", 100, 64);
+            overlayText("Right Arrow or Right Click", 100, 96);
+
+            overlayText("Press Z, Left Shift,", -400, 64);
+            overlayText("Left Arrow or Left Click", -400, 96);
+        }
     }
     if (GameState.phase === GamePhase.Died) {
         overlayText("Ball drained", -80, -1048);
@@ -104,6 +138,28 @@ export const render = (dt: number) => {
     }
     if (GameState.phase === GamePhase.GameOver) {
         overlayText("GAME OVER", -80, -500);
+    }
+    if (GameState.phase === GamePhase.Victory) {
+        let yMotion = (GameState.timeOnCurrentPhase / 10) * VICTORY_PLANT_HEIGHT;
+        if (yMotion > VICTORY_PLANT_HEIGHT) {
+            yMotion = VICTORY_PLANT_HEIGHT;
+        }
+        let plantY = 0 - yMotion;
+        let plant = victoryPlant1;
+        if (GameState.timeOnCurrentPhase > 20) {
+            plant = victoryPlant2;
+        }
+        if (GameState.timeOnCurrentPhase > 35) {
+            plant = victoryPlant3;
+        }
+        context.drawImage(
+            plant,
+            -VICTORY_PLANT_WIDTH / 2 + 20,
+            plantY + 200,
+            VICTORY_PLANT_WIDTH,
+            VICTORY_PLANT_HEIGHT
+        );
+        overlayText("You kept it alive!", -100, -420);
     }
 
     context.restore();
